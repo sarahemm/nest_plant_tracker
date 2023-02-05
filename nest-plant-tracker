@@ -143,11 +143,14 @@ class PlantRepo < ROM::Repository[:plants]
   end
 
   def active_plants_with_locations
-    plants.combine(:locations)
+    plants
+      .join(:locations)
+      .combine(:locations)
       .combine(plant_waters: :watering_statuses)
       .node(:plant_waters) {|plant_waters_relation|
         plant_waters_relation.reverse
       }
+      .order(locations[:name])
       .where(active: true)
   end
 end
@@ -273,5 +276,37 @@ delete '/plants/:id' do |plant_id|
     by: session[:user],
     message: "Archived plant."
 
+  redirect '/plants'
+end
+
+
+### BULK WATERING
+
+get '/bulk-watering' do
+  require_logged_in
+
+  @plants = PlantRepo.new(DB).active_plants_with_locations
+  @watering_statuses = WateringStatusRepo.new(DB).all
+  haml :bulk_watering
+end
+
+post '/bulk-watering' do
+  require_logged_in
+
+  plant_waters = DB.relations[:plant_waters]
+  params.each do |key, status_id|
+    next if status_id.empty?
+    next unless key.start_with? 'plant'
+
+    plant_id = key.delete_prefix('plant')
+    
+    plant_waters.changeset(:create,
+      plant_id: plant_id,
+      watered_at: Time.now, watered_by: session[:user],
+      watering_status_id: status_id,
+      notes: params["note#{plant_id}"] == '' ? nil : params["note#{plant_id}"]
+    ).commit
+  end
+    
   redirect '/plants'
 end

@@ -1,0 +1,31 @@
+%h2 Bulk Watering
+%form{method: :post}
+ %table.table.table-striped
+  %thead
+   %tr
+    %th{scope: 'col'} Location
+    %th{scope: 'col'} Science Name
+    %th{scope: 'col'} Plant Type
+    %th{scope: 'col'} Name
+    %th{scope: 'col'} Watering
+    %th{scope: 'col'} Notes
+  %tbody
+   - @plants.each do |plant|
+    %tr
+     %td= plant[:location][:name]
+     %td= plant[:science_name]
+     %td= plant[:plant_type]
+     %td= plant[:our_name]
+     %td
+      %input.btn-check{type: :radio, id: "plant#{plant[:id]}-btnWaterNIL", name: "plant#{plant[:id]}", checked: true, value: ''}
+      %label.btn.btn-outline-secondary.me-3{for: "plant#{plant[:id]}-btnWaterNIL"} 
+       Not Checked
+      .btn-group{role: :group}
+       - @watering_statuses.each do |status|
+        %input.btn-check{type: :radio, id: "plant#{plant[:id]}-btnWater#{status[:id]}", name: "plant#{plant[:id]}", value: status[:id]}
+        %label.btn.btn-outline-primary{for: "plant#{plant[:id]}-btnWater#{status[:id]}"}
+         =status[:name]
+     %td
+      %input{id: "note#{plant[:id]}", name: "note#{plant[:id]}"}
+ %button.btn.btn-primary{type: :submit}
+  Submit Watering Update
