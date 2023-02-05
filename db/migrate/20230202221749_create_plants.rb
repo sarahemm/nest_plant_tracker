@@ -9,7 +9,7 @@ ROM::SQL.migration do
       column :plant_type, String
       column :our_name, String, null: false
       column :location_id, Integer, null: false
-      column :water_freq, String
+      column :water_freq, Integer
       column :watering_notes, String
       column :general_notes, String
     end
