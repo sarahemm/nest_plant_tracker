@@ -1,0 +1,20 @@
+%h2 Plants
+%table.table.table-striped
+  %thead
+    %tr
+      %th{scope: 'col'} Location
+      %th{scope: 'col'} Science Name
+      %th{scope: 'col'} Type
+      %th{scope: 'col'} Name
+      %th{scope: 'col'} Last Watered
+      %th{scope: 'col'} Last Water Check
+  - @plants.each do |plant|
+    %tr
+      %td= plant[:location][:name]
+      %td= plant[:science_name]
+      %td= plant[:plant_type]
+      %td
+        %a{href: "/plants/#{plant[:id]}"}= plant[:our_name]
+      %td= plant.last_watered_at.ago
+      %td= plant.last_water_check.ago
+

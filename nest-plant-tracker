@@ -1,0 +1,277 @@
+#!/usr/bin/ruby
+
+require 'sinatra'
+require 'haml'
+require 'bcrypt'
+require 'rom-repository'
+require 'rom-changeset'
+
+enable :sessions
+set :port, 4595
+
+module PlantTracker
+  class Plant < ROM::Struct
+    def last_watered_at
+      plant_waters.each do |water|
+        next unless water[:watering_status][:counts_as_watered]
+        return water[:watered_at]
+      end
+
+      nil
+    end
+
+    def last_water_check
+      return nil if plant_waters.empty?
+      plant_waters[0][:watered_at]
+    end
+  end
+end
+
+class Time
+  def app_format
+    self.getlocal('-05:00').strftime('%Y-%m-%d %H:%M')
+  end
+
+  def ago
+    days = (Time.now - self) / (60*60*24)
+    int_days = days.to_i
+    hours = ((days - int_days) * 24).to_i
+    ago = "#{int_days}d #{hours}h ago"
+    ago = "#{hours} hours ago" if int_days == 0
+
+    ago
+  end
+
+  def app_format_with_ago
+    "#{self.app_format} (#{self.ago})"
+  end
+end
+
+class NilClass
+  def app_format
+    return "Never"
+  end
+
+  def ago
+    return "Never"
+  end
+
+  def app_format_with_ago
+    return "Never"
+  end
+end
+
+DB = ROM.container(:sql, "sqlite://#{Dir.pwd}/nest-plant-tracker.sqlite3") do |config|
+  config.relation(:users) do
+    schema(infer: true)
+  end
+
+  config.relation(:plants) do
+    struct_namespace PlantTracker
+    auto_struct true
+    schema(infer: true) do
+      associations do
+        belongs_to :location
+        has_many :changelogs
+        has_many :plant_waters
+      end
+    end
+  end
+
+  config.relation(:plant_waters) do
+    schema(infer: true) do
+      associations do
+        belongs_to :plant
+        belongs_to :watering_status
+      end
+    end
+  end
+
+  config.relation(:locations) do
+    schema(infer: true) do
+      associations do
+        has_many :plants
+      end
+    end
+  end
+
+  config.relation(:changelogs) do
+    schema(infer: true) do
+      associations do
+        belongs_to :plant
+      end
+    end
+  end
+  
+  config.relation(:watering_statuses) do
+    schema(infer: true) do
+      associations do
+        has_many :plant_waters
+      end
+    end
+  end
+end
+
+class UserRepo < ROM::Repository[:users]
+  def check_login(username, password)
+    user = users.where(username: username).one!
+    return true if user and BCrypt::Password.new(user[:pwhash]) == password
+    false
+  end
+end
+
+class PlantRepo < ROM::Repository[:plants]
+  struct_namespace PlantTracker
+  
+  def query(conditions)
+    plants.where(conditions).to_a
+  end
+
+  def by_id(id)
+    plants
+      .by_pk(id)
+      .combine(:locations)
+      .combine(:changelogs)
+      .combine(plant_waters: :watering_statuses)
+      .node(:plant_waters) {|plant_waters_relation|
+        plant_waters_relation.reverse
+      }
+      .node(:changelogs) {|changelogs_relation|
+        changelogs_relation.reverse
+      }
+      .one!
+  end
+
+  def active_plants_with_locations
+    plants.combine(:locations)
+      .combine(plant_waters: :watering_statuses)
+      .node(:plant_waters) {|plant_waters_relation|
+        plant_waters_relation.reverse
+      }
+      .where(active: true)
+  end
+end
+
+class LocationRepo < ROM::Repository[:locations]
+  def all
+    locations.to_a
+  end
+
+  def query(conditions)
+    locations.where(conditions).to_a
+  end
+
+  def by_id(id)
+    locations.by_pk(id).one!
+  end
+end
+
+class ChangelogRepo < ROM::Repository[:changelogs]
+  def add_log_entry(plant:, by:, message:)
+    changelogs.changeset(:create, plant_id: plant, logged_at: Time.now, logged_by: by, message: message).commit
+  end
+end
+
+class WateringStatusRepo < ROM::Repository[:watering_statuses]
+  def all
+    watering_statuses.to_a
+  end
+end
+
+class PlantWatersRepo < ROM::Repository[:plant_waters]
+end
+
+def require_logged_in
+  session[:user] = 'sen'
+  #redirect '/login' unless session[:user]
+end
+
+
+### ROOT
+
+get '/' do
+  redirect '/plants'
+end
+
+
+### USER MANAGEMENT
+
+get '/login' do
+  haml :login
+end
+
+post '/login' do
+  login_ok = UserRepo.new(DB).check_login(params[:username], params[:password])
+  if login_ok then
+    session[:user] = params[:username]
+    redirect '/plants'
+  else
+    redirect '/login'
+  end
+end
+
+
+### PLANTS
+
+get '/plants' do
+  require_logged_in
+
+  @plants = PlantRepo.new(DB).active_plants_with_locations
+  haml :plants
+end
+
+get '/plants/:id' do |id|
+  require_logged_in
+
+  @plant = PlantRepo.new(DB).by_id(id)
+  @locations = LocationRepo.new(DB).all
+  @watering_statuses = WateringStatusRepo.new(DB).all
+  haml :plant
+end
+
+post '/plants/:id' do |plant_id|
+  require_logged_in
+
+  if(params[:location]) then
+    old_loc = PlantRepo.new(DB).by_id(plant_id)[:location][:name]
+    new_loc = LocationRepo.new(DB).by_id(params[:location])[:name]
+    
+    ChangelogRepo.new(DB).add_log_entry plant: plant_id,
+      by: session[:user],
+      message: "Plant moved from #{old_loc} to #{new_loc}."
+    
+    plant = DB.relations[:plants].by_pk(plant_id)
+    plant.changeset(:update, location_id: params[:location]).commit
+  elsif(params[:name]) then
+    old_name = PlantRepo.new(DB).by_id(plant_id)[:our_name]
+    ChangelogRepo.new(DB).add_log_entry plant: plant_id,
+      by: session[:user],
+      message: "Plant renamed from #{old_name} to #{params[:name]}."
+    
+    plant = DB.relations[:plants].by_pk(plant_id)
+    plant.changeset(:update, our_name: params[:name]).commit
+  elsif(params[:waterstatus]) then
+    plant_waters = DB.relations[:plant_waters]
+    plant_waters.changeset(:create,
+      plant_id: plant_id,
+      watered_at: Time.now, watered_by: session[:user],
+      watering_status_id: params[:waterstatus],
+      notes: params[:notes] == '' ? nil : params[:notes]
+    ).commit
+  end
+
+  redirect "/plants/#{plant_id}"
+end
+
+delete '/plants/:id' do |plant_id|
+  require_logged_in
+
+  plant = DB.relations[:plants].by_pk(plant_id)
+  plant.changeset(:update, active: false).commit
+
+  ChangelogRepo.new(DB).add_log_entry plant: plant_id,
+    by: session[:user],
+    message: "Archived plant."
+
+  redirect '/plants'
+end

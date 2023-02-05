@@ -1,5 +1,9 @@
 *.gem
 *.rbc
+*.sqlite3
+*.csv
+bootstrap*
+jquery*
 /.config
 /coverage/
 /InstalledFiles

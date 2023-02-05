@@ -1,0 +1,110 @@
+%h2 Plant Details for #{@plant[:our_name]}
+%ul
+ %li Science name: #{@plant[:science_name]}
+ %li Type: #{@plant[:plant_type]}
+ %li Name: #{@plant[:our_name]}
+ %li Location: #{@plant[:location][:name]}
+ %li Water every: #{@plant[:water_freq]} days
+ %li Watering notes: #{@plant[:watering_notes]}
+ %li General notes: #{@plant[:general_notes]}
+ %li Last watered: #{@plant.last_watered_at.app_format_with_ago}
+Watering Log:
+%ul
+ - @plant[:plant_waters].each do |watering|
+  - pp watering
+  %li= "#{watering[:watered_at].app_format} [#{watering[:watered_by]}]: #{watering[:watering_status][:name]} #{watering[:notes] ? "(#{watering[:notes]})" : ''}"
+
+Plant Change Log:
+%ul
+ - @plant[:changelogs].each do |log|
+  %li= "#{log[:logged_at].app_format} [#{log[:logged_by]}]: #{log[:message]}"
+
+%button.btn.btn-success{'data-bs-toggle' => 'modal', 'data-bs-target' => '#waterModal'}
+ Water #{@plant[:our_name]}
+%button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#renameModal'}
+ Rename #{@plant[:our_name]}
+%button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#relocateModal'}
+ Relocate #{@plant[:our_name]}
+%button.btn.btn-danger{'data-bs-toggle' => 'modal', 'data-bs-target' => '#archiveModal'}
+ Archive #{@plant[:our_name]}
+
+.modal.fade#relocateModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %h5.modal-title#relocateModalLabel
+      Relocate #{@plant[:our_name]}
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     - @locations.each do |loc|
+      %input.btn-check{type: :radio, id: "btnLocation#{loc[:id]}", name: :location, value: loc[:id], checked: @plant[:location_id] == loc[:id]}
+      %label.btn.btn-outline-primary{for: "btnLocation#{loc[:id]}"}
+       =loc[:name]
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-primary{type: :submit}
+      Save New Location
+
+.modal.fade#renameModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %h5.modal-title#renameModalLabel
+      Rename #{@plant[:our_name]}
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     %label{for: "name"}
+      New Name:
+     %input.form-control#name{value: @plant[:our_name], name: 'name', autocomplete: 'off'}
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-primary{type: :submit}
+      Save New Name
+
+.modal.fade#archiveModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %h5.modal-title#archiveModalLabel
+      Archive #{@plant[:our_name]}
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     %p
+      Are you sure you want to archive #{@plant[:our_name]}? This will remove them from the list, cancel all future reminders, etc.
+     %p
+      The data will still be in the database in case it's needed for reference purposes.
+     %input{type: :hidden, name: '_method', value: 'delete'}
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-danger{type: :submit}
+      Yes, Archive Plant
+
+.modal.fade#waterModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %h5.modal-title#waterModalLabel
+      Water #{@plant[:our_name]}
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     - @watering_statuses.each do |status|
+      %input.btn-check{type: :radio, id: "btnWater#{status[:id]}", name: :waterstatus, value: status[:id]}
+      %label.btn.btn-outline-primary{for: "btnWater#{status[:id]}"}
+       =status[:name]
+     %p
+      %label{for: "notes"}
+       Notes:
+      %input.form-control#name{name: 'notes'}
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-success{type: :submit}
+      Save Update
+
