@@ -45,6 +45,10 @@ class Time
   def app_format_with_ago
     "#{self.app_format} (#{self.ago})"
   end
+
+  def days_ago
+    (Time.now - self) / (60*60*24).to_i
+  end
 end
 
 class NilClass
@@ -292,8 +296,12 @@ get '/bulk-watering' do
     end
   end
   selected_locations << (0..999) if selected_locations.empty? # default, covers all locations
-
+  
+  @within_watering_days = params[:within_watering_days] || 0
+  @not_checked_in_days = params[:not_checked_in] || 2
+  
   @plants = PlantRepo.new(DB).active_plants_with_locations
+    .where {water_freq > 0}
     .where {location_id.in(*selected_locations)}
   @watering_statuses = WateringStatusRepo.new(DB).all
   @locations = LocationRepo.new(DB).all

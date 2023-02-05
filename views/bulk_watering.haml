@@ -1,6 +1,6 @@
 %h2 Bulk Watering
 
-.p-3.bg-primary-subtle.rounded
+.container.p-3.bg-primary-subtle.rounded
  %form{method: :get}
   %h4 Filter
   .input-group.mb-3
@@ -9,10 +9,16 @@
     %input.btn-check{type: :checkbox, id: "btnLocation#{loc[:id]}", name: "location#{loc[:id]}", checked: params.include?("location#{loc[:id]}")}
     %label.btn.btn-outline-primary{for: "btnLocation#{loc[:id]}"}
      =loc[:name]
+  %label{for: 'within_watering_days'}
+   %span#watering_days_label Needs water today (or past-due)
+  %input.form-range#within_watering_days{type: :range, min: 0, max: 7, value: @within_watering_days, name: :within_watering_days, onInput: 'updateWateringDaysText();'}
+  %label{for: 'not_checked_in'}
+   %span#not_checked_in_label and hasn't been checked yesterday or today
+  %input.form-range#not_checked_in{type: :range, min: 0, max: 7, value: @not_checked_in_days, name: :not_checked_in, onInput: 'updateNotCheckedInText();'}
   %p.mt-3
    %button.btn.btn-primary{type: :submit}
     Adjust Filter
-   %button.btn.btn-outline-secondary{type: :reset}
+   %button.btn.btn-outline-secondary{type: :button, onClick: 'this.form.reset(); updateWateringDaysText(); updateNotCheckedInText();'}
     Reset Filters
 
 %form{method: :post}
@@ -27,6 +33,8 @@
     %th{scope: 'col'} Notes
   %tbody
    - @plants.each do |plant|
+    - next unless plant.last_water_check == nil or plant.last_water_check.days_ago > @not_checked_in_days.to_i
+    - next unless plant.last_watered_at == nil or plant.last_watered_at.days_ago + @within_watering_days.to_i >= plant.water_freq
     %tr
      %td= plant[:location][:name]
      %td= plant[:science_name]
