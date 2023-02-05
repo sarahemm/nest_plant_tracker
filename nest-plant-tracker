@@ -285,14 +285,25 @@ end
 get '/bulk-watering' do
   require_logged_in
 
+  selected_locations = []
+  params.each do |key, val|
+    if(key.start_with? 'location') then
+      selected_locations << key.delete_prefix('location').to_i
+    end
+  end
+  selected_locations << (0..999) if selected_locations.empty? # default, covers all locations
+
   @plants = PlantRepo.new(DB).active_plants_with_locations
+    .where {location_id.in(*selected_locations)}
   @watering_statuses = WateringStatusRepo.new(DB).all
+  @locations = LocationRepo.new(DB).all
+
   haml :bulk_watering
 end
 
 post '/bulk-watering' do
   require_logged_in
-
+  
   plant_waters = DB.relations[:plant_waters]
   params.each do |key, status_id|
     next if status_id.empty?

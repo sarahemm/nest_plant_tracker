@@ -1,4 +1,20 @@
 %h2 Bulk Watering
+
+.p-3.bg-primary-subtle.rounded
+ %form{method: :get}
+  %h4 Filter
+  .input-group.mb-3
+   %span.input-group-text Locations
+   - @locations.each do |loc|
+    %input.btn-check{type: :checkbox, id: "btnLocation#{loc[:id]}", name: "location#{loc[:id]}", checked: params.include?("location#{loc[:id]}")}
+    %label.btn.btn-outline-primary{for: "btnLocation#{loc[:id]}"}
+     =loc[:name]
+  %p.mt-3
+   %button.btn.btn-primary{type: :submit}
+    Adjust Filter
+   %button.btn.btn-outline-secondary{type: :reset}
+    Reset Filters
+
 %form{method: :post}
  %table.table.table-striped
   %thead
