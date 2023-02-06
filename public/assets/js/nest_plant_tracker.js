@@ -14,7 +14,7 @@ function updateNotCheckedInText() {
   var new_val = $(not_checked_in).val();
 
   if(new_val == 0) {
-    $(not_checked_in_label).text("");
+    $(not_checked_in_label).text("no matter when they were last checked");
   } else if(new_val == 1) {
     $(not_checked_in_label).text("and hasn't been checked today");
   } else if(new_val == 2) {
