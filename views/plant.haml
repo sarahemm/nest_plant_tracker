@@ -4,7 +4,10 @@
  %li Type: #{@plant[:plant_type]}
  %li Name: #{@plant[:our_name]}
  %li Location: #{@plant[:location][:name]}
- %li Water every: #{@plant[:water_freq]} days
+ - if @plant.requires_water?
+  %li Water every: #{@plant[:water_freq]} days
+ - else
+  %li Does not require scheduled watering
  %li Fertilizer notes: #{@plant[:fertilizer_notes]}
  %li Watering notes: #{@plant[:watering_notes]}
  %li General notes: #{@plant[:general_notes]}

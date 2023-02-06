@@ -24,6 +24,10 @@ module PlantTracker
       return nil if plant_waters.empty?
       plant_waters[0][:watered_at]
     end
+
+    def requires_water?
+      water_freq > 0
+    end
   end
 end
 

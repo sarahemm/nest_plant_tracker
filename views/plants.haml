@@ -15,6 +15,10 @@
       %td= plant[:plant_type]
       %td
         %a{href: "/plants/#{plant[:id]}"}= plant[:our_name]
-      %td= plant.last_watered_at.ago
-      %td= plant.last_water_check.ago
+      - if plant.requires_water?
+        %td= plant.last_watered_at.ago
+        %td= plant.last_water_check.ago
+      - else
+        %td N/A
+        %td N/A
 
