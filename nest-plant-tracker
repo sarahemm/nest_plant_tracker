@@ -37,7 +37,11 @@ class Time
     int_days = days.to_i
     hours = ((days - int_days) * 24).to_i
     ago = "#{int_days}d #{hours}h ago"
-    ago = "#{hours} hours ago" if int_days == 0
+    if(int_days == 0 and hours == 0) then
+      ago = "#{((Time.now-self) / 60).to_i} mins ago"
+    elsif(int_days == 0) then
+      ago = "#{hours} hours ago" if int_days == 0
+    end
 
     ago
   end
@@ -189,8 +193,7 @@ class PlantWatersRepo < ROM::Repository[:plant_waters]
 end
 
 def require_logged_in
-  session[:user] = 'sen'
-  #redirect '/login' unless session[:user]
+  redirect '/login' unless session[:user]
 end
 
 
@@ -221,8 +224,6 @@ end
 ### PLANTS
 
 get '/plants' do
-  require_logged_in
-
   @plants = PlantRepo.new(DB).active_plants_with_locations
   haml :plants
 end
