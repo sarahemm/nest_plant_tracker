@@ -26,7 +26,6 @@
   %thead
    %tr
     %th{scope: 'col'} Location
-    %th{scope: 'col'} Science Name
     %th{scope: 'col'} Plant Type
     %th{scope: 'col'} Name
     %th{scope: 'col'} Watering
@@ -37,7 +36,6 @@
     - next unless plant.last_watered_at == nil or plant.last_watered_at.days_ago + @within_watering_days.to_i >= plant.water_freq
     %tr
      %td= plant[:location][:name]
-     %td= plant[:science_name]
      %td= plant[:plant_type]
      %td= plant[:our_name]
      %td
