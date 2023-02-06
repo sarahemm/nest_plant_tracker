@@ -7,6 +7,22 @@
     %script{src: "/assets/js/bootstrap.bundle.min.js"}
     %script{src: "/assets/js/nest_plant_tracker.js"}
   %body
-    %div.container-fluid
-      %h1 Nest Plant Tracker
+    %nav.navbar.navbar-expand-lg.bg-body-secondary
+      .container-fluid
+        %a.navbar-brand{href: '#'} Nest Plant Tracker
+        %button.navbar-toggler{type: :button, 'data-bs-toggle': :collapse, 'data-bs-target': '#navbarSupportedContent', 'aria-controls': 'navbarSupportedContent', 'aria-expanded': false, 'aria-label': 'Toggle navigation'}
+          %span.navbar-toggler-icon
+        .collapse.navbar-collapse#navbarSupportedContent
+          %ul.navbar-nav.me-auto.mb-2.mb-lg-0
+            %li.nav-item
+              - if request.path_info == '/' || request.path_info == '/plants'
+                %a.nav-link.active{href: '/', 'aria-current': :page} Plants
+              - else
+                %a.nav-link{href: '/'} Plants
+            %li.nav-item
+              - if request.path_info == '/bulk-watering'
+                %a.nav-link.active{href: '/bulk-watering', 'aria-current': :page} Bulk Watering
+              - else
+                %a.nav-link{href: '/bulk-watering'} Bulk Watering
+    .container-fluid
       = yield
