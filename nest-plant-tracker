@@ -197,7 +197,10 @@ class PlantWatersRepo < ROM::Repository[:plant_waters]
 end
 
 def require_logged_in
-  redirect '/login' unless session[:user]
+  return if session[:user]
+
+  session[:desired_page] = request.fullpath
+  redirect '/login'
 end
 
 
@@ -218,7 +221,9 @@ post '/login' do
   login_ok = UserRepo.new(DB).check_login(params[:username], params[:password])
   if login_ok then
     session[:user] = params[:username]
-    redirect '/plants'
+    desired_page = session[:desired_page]
+    session.delete :desired_page
+    redirect desired_page || '/plants'
   else
     redirect '/login'
   end
