@@ -331,6 +331,6 @@ post '/bulk-watering' do
       notes: params["note#{plant_id}"] == '' ? nil : params["note#{plant_id}"]
     ).commit
   end
-    
-  redirect '/plants'
+
+  redirect request.fullpath
 end
