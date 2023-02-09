@@ -1,0 +1,32 @@
+%h2 Locations
+%table.table.table-striped
+ %thead
+  %tr
+   %th{scope: 'col'} Name
+   %th{scope: 'col'} Controls
+ %tbody
+  - @locations.each do |location|
+   %tr
+    %td= location.name
+    %td
+     %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#renameModal', onClick: "readyRenameLocation('#{location.name}', #{location.id});"}
+      Change Name
+
+.modal.fade#renameModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %h5.modal-title#renameModalLabel
+      %span#renameTitle
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     %label{for: "newName"}
+      New Name:
+     %input.form-control#newName{name: 'name', autocomplete: 'off'}
+     %input.form-control#locationId{name: 'id', type: :hidden}
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-primary{type: :submit}
+      Save New Name

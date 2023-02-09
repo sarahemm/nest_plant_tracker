@@ -24,5 +24,12 @@
                 %a.nav-link.active{href: '/bulk-watering', 'aria-current': :page} Bulk Watering
               - else
                 %a.nav-link{href: '/bulk-watering'} Bulk Watering
+            - if is_logged_in?
+              %li.nav-item.dropdown
+                %a.nav-link.dropdown-toggle{href: '#', role: :button, 'aria-expanded': false, 'data-bs-toggle': :dropdown } Maintenance
+                %ul.dropdown-menu
+                  %li
+                    %a.dropdown-item{href: '#'} Add New Plant
+                    %a.dropdown-item{href: '/locations'} Edit Locations
     .container-fluid
       = yield

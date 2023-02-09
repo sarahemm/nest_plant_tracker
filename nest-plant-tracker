@@ -341,3 +341,23 @@ post '/bulk-watering' do
 
   redirect request.fullpath
 end
+
+
+### LOCATIONS
+
+get '/locations' do
+  require_logged_in
+
+  @locations = LocationRepo.new(DB).all
+
+  haml :locations
+end
+
+post '/locations' do
+  require_logged_in
+
+  loc = DB.relations[:locations].by_pk(params[:id])
+  loc.changeset(:update, name: params[:name]).commit
+
+  redirect '/locations'
+end
