@@ -23,14 +23,15 @@ Plant Change Log:
  - @plant.changelogs.each do |log|
   %li= "#{log.logged_at.app_format} [#{log.logged_by}]: #{log.message}"
 
-%button.btn.btn-success{'data-bs-toggle' => 'modal', 'data-bs-target' => '#waterModal'}
- Water #{@plant.our_name}
-%button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#renameModal'}
- Rename #{@plant.our_name}
-%button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#relocateModal'}
- Relocate #{@plant.our_name}
-%button.btn.btn-danger{'data-bs-toggle' => 'modal', 'data-bs-target' => '#archiveModal'}
- Archive #{@plant.our_name}
+- if is_logged_in?
+ %button.btn.btn-success{'data-bs-toggle' => 'modal', 'data-bs-target' => '#waterModal'}
+  Water #{@plant.our_name}
+ %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#renameModal'}
+  Rename #{@plant.our_name}
+ %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#relocateModal'}
+  Relocate #{@plant.our_name}
+ %button.btn.btn-danger{'data-bs-toggle' => 'modal', 'data-bs-target' => '#archiveModal'}
+  Archive #{@plant.our_name}
 
 .modal.fade#relocateModal{tabIndex: -1, role: :dialog}
  .modal-dialog{role: :document}

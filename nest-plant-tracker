@@ -203,6 +203,10 @@ def require_logged_in
   redirect '/login'
 end
 
+def is_logged_in?
+  session.include? :user
+end
+
 
 ### ROOT
 
@@ -238,8 +242,6 @@ get '/plants' do
 end
 
 get '/plants/:id' do |id|
-  require_logged_in
-
   @plant = PlantRepo.new(DB).by_id(id)
   @locations = LocationRepo.new(DB).all
   @watering_statuses = WateringStatusRepo.new(DB).all
