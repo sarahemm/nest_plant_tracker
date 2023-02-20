@@ -31,9 +31,11 @@
     %th{scope: 'col'} Watering
     %th{scope: 'col'} Notes
   %tbody
+   - plants_to_water = false
    - @plants.each do |plant|
     - next unless plant.last_water_check == nil or plant.last_water_check.days_ago > @not_checked_in_days.to_i
     - next unless plant.last_watered_at == nil or plant.last_watered_at.days_ago + @within_watering_days.to_i >= plant.water_freq
+    - plants_to_water = true
     %tr
      %td= plant[:location][:name]
      %td= plant[:plant_type]
@@ -49,5 +51,6 @@
          =status[:name]
      %td
       %input{id: "note#{plant[:id]}", name: "note#{plant[:id]}"}
- %button.btn.btn-primary{type: :submit}
-  Submit Watering Update
+ - if plants_to_water
+  %button.btn.btn-primary{type: :submit}
+   Submit Watering Update
