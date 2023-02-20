@@ -165,6 +165,19 @@ class PlantRepo < ROM::Repository[:plants]
       .order(locations[:name])
       .where(active: true)
   end
+
+  def add_plant(science_name:, plant_type:, our_name:, location_id:, water_freq:, fert_notes:, water_notes:, gen_notes:)
+    plants.changeset(:create,
+      science_name: science_name,
+      plant_type: plant_type,
+      our_name: our_name,
+      location_id: location_id,
+      water_freq: water_freq,
+      fertilizer_notes: fert_notes,
+      watering_notes: water_notes,
+      general_notes: gen_notes,
+      active: true).commit
+  end
 end
 
 class LocationRepo < ROM::Repository[:locations]
@@ -239,6 +252,36 @@ end
 get '/plants' do
   @plants = PlantRepo.new(DB).active_plants_with_locations
   haml :plants
+end
+
+get '/plants/new' do
+  require_logged_in
+
+  @locations = LocationRepo.new(DB).all
+  haml :plants_new
+end
+
+post '/plants/new' do
+  require_logged_in
+
+  params.each do |key, val|
+    params[key] = nil if val == ''
+  end
+
+  plant = PlantRepo.new(DB).add_plant science_name: params['science_name'],
+   plant_type: params['plant_type'],
+   our_name: params['our_name'],
+   water_freq: params['water_every'],
+   location_id: params['location'],
+   fert_notes: params['fertilizer_notes'],
+   water_notes: params['water_notes'],
+   gen_notes: params['general_notes']
+
+  ChangelogRepo.new(DB).add_log_entry plant: plant.id,
+    by: session[:user],
+    message: "Added plant to database."
+
+  redirect '/plants'
 end
 
 get '/plants/:id' do |id|

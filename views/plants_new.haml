@@ -1,0 +1,40 @@
+%h2 Add New Plant
+
+%form{method: :post}
+ .mb-3
+  %label.form-label{for: 'scienceName'} Science Name
+  %input.form-control#scienceName{name: 'science_name'}
+
+ .mb-3
+  %label.form-label{for: 'plantType'} Plant Type
+  %input.form-control#plantType{name: 'plant_type'}
+
+ .mb-3
+  %label.form-label{for: 'ourName'} Name
+  %input.form-control#ourName{name: 'our_name', required: true}
+
+ .mb-3
+  %label.form-label{for: 'location'} Location
+  %select.form-select#location{name: 'location', 'aria-label': 'Location Selection'}
+   - @locations.each do |loc|
+    %option{name: 'location', value: loc.id}
+     =loc.name
+
+ .mb-3
+  %label.form-label{for: 'waterEvery'} Water every x days (blank = no scheduled watering)
+  %input.form-control#waterEvery{name: 'water_every', maxlength: 2, style: 'width: 3em', value: 7}
+
+ .mb-3
+  %label.form-label{for: 'fertilizerNotes'} Fertilizer Notes
+  %input.form-control#fertilizerNotes{name: 'fertilizer_notes'}
+
+ .mb-3
+  %label.form-label{for: 'wateringNotes'} Watering Notes
+  %input.form-control#wateringNotes{name: 'watering_notes'}
+
+ .mb-3
+  %label.form-label{for: 'generalNotes'} General Notes
+  %input.form-control#generalNotes{name: 'general_notes'}
+
+ %button.btn.btn-primary{type: :submit}
+  Save New Plant
