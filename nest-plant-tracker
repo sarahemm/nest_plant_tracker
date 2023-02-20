@@ -246,6 +246,11 @@ post '/login' do
   end
 end
 
+get '/logout' do
+  session.delete :user
+  haml :logout
+end
+
 
 ### PLANTS
 
