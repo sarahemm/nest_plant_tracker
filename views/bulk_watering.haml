@@ -40,7 +40,7 @@
      %td= plant[:location][:name]
      %td= plant[:plant_type]
      %td
-      %a{'data-bs-toggle': :popover, tabindex: 0, role: :button, 'data-bs-html': :true, title: "Watering Info for #{plant[:our_name]}", 'data-bs-content': "<ul><li>Water every #{plant.water_freq} days<li>Last checked: #{plant.last_water_check.ago}<li>Last watered: #{plant.last_watered_at.ago}#{"<li>Watering notes: #{plant.watering_notes}" unless plant.watering_notes == ''}</ul>"}
+      %a{'data-bs-toggle': :popover, 'data-bs-trigger': :focus, tabindex: 0, role: :button, 'data-bs-html': :true, title: "Watering Info for #{plant[:our_name]}", 'data-bs-content': "<ul><li>Water every #{plant.water_freq} days<li>Last checked: #{plant.last_water_check.ago}<li>Last watered: #{plant.last_watered_at.ago}#{"<li>Watering notes: #{plant.watering_notes}" unless plant.watering_notes == ''}</ul>"}
        =plant[:our_name]
      %td
       %input.btn-check{type: :radio, id: "plant#{plant[:id]}-btnWaterNIL", name: "plant#{plant[:id]}", checked: true, value: ''}
