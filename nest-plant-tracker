@@ -2,6 +2,7 @@
 
 require 'sinatra'
 require 'haml'
+require 'json'
 require 'bcrypt'
 require 'rom-repository'
 require 'rom-changeset'
@@ -363,6 +364,7 @@ get '/bulk-watering' do
   @plants = PlantRepo.new(DB).active_plants_with_locations
     .where {water_freq > 0}
     .where {location_id.in(*selected_locations)}
+    .order(:location_id, :watering_order, :our_name)
   @watering_statuses = WateringStatusRepo.new(DB).all
   @locations = LocationRepo.new(DB).all
 
@@ -408,4 +410,28 @@ post '/locations' do
   loc.changeset(:update, name: params[:name]).commit
 
   redirect '/locations'
+end
+
+
+### WATERING ORDER
+#
+get '/watering_order/:location_id' do |loc_id|
+  require_logged_in
+
+  @plants = PlantRepo.new(DB).active_plants_with_locations.where{water_freq > 0}.where(location_id: loc_id).order(:watering_order, :our_name).to_a
+  @location = LocationRepo.new(DB).by_id(loc_id)
+
+  haml :watering_order
+end
+
+post '/watering_order/:location_id' do |loc_id|
+  require_logged_in
+
+  watering_order = JSON.parse(params['watering_order'])
+  watering_order.each do |plant_id, order|
+    plant = DB.relations[:plants].by_pk(plant_id)
+    plant.changeset(:update, watering_order: order).commit
+  end
+
+  redirect "/watering_order/#{loc_id}"
 end

@@ -1,0 +1,29 @@
+%h2 Adjust Watering Order for #{@location.name}
+
+:javascript
+ $(function() {
+  $('.list-group-sortable').sortable({
+    placeholderClass: 'list-group-item'
+  });
+ });
+
+ function assembleOrder() {
+  var output = {};
+  for(let i=0; i<$('#plants').children().length; i++) {
+    var plant = $('#plants').children()[i];
+    var plant_id = plant.attributes['plant_id'].value;
+
+    output[plant_id] = i;
+  }
+  
+  $('#watering_order').val(JSON.stringify(output));
+  return true;
+ }
+
+%form{method: :post}
+ %input#watering_order{type: :hidden, name: 'watering_order'}
+ %ul#plants.sortable.list-group.list-group-sortable
+  - @plants.each do |plant|
+   %li.list-group-item{draggable: 'true', plant_id: plant.id}
+    =plant.our_name
+ %button.btn.btn-primary.mt-3{type: :submit, onClick: 'assembleOrder()'} Update Watering Order

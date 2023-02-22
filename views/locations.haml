@@ -11,6 +11,8 @@
     %td
      %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#renameModal', onClick: "readyRenameLocation('#{location.name}', #{location.id});"}
       Change Name
+     %a.btn.btn-primary{href: "/watering_order/#{location.id}"}
+      Adjust Watering Order
 
 .modal.fade#renameModal{tabIndex: -1, role: :dialog}
  .modal-dialog{role: :document}
