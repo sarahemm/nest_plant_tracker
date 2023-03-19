@@ -91,6 +91,9 @@ Plant Change Log:
      %p
       The data will still be in the database in case it's needed for reference purposes.
      %input{type: :hidden, name: '_method', value: 'delete'}
+     %label{for: "name"}
+      Archival Reason/Notes:
+     %input.form-control#archiveNotes{name: 'archive_notes', autocomplete: 'off'}
     .modal-footer
      %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
       Cancel

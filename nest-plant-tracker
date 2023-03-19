@@ -418,9 +418,11 @@ delete '/plants/:id' do |plant_id|
   plant = DB.relations[:plants].by_pk(plant_id)
   plant.changeset(:update, active: false).commit
 
+  message = "Archived plant."
+  message = "Archived plant with note '#{params[:archive_notes]}'" if params[:archive_notes] != ''
   ChangelogRepo.new(DB).add_log_entry plant: plant_id,
     by: session[:user],
-    message: "Archived plant."
+    message: message
 
   redirect '/plants'
 end
