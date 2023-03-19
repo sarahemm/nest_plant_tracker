@@ -15,7 +15,6 @@
 Watering Log:
 %ul
  - @plant.plant_waters.each do |watering|
-  - pp watering
   %li= "#{watering.watered_at.app_format} [#{watering.watered_by}]: #{watering.watering_status.name} #{watering.notes ? "(#{watering.notes})" : ''}"
 
 Plant Change Log:
