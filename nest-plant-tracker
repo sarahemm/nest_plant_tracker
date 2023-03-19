@@ -422,7 +422,7 @@ end
 
 
 ### WATERING ORDER
-#
+
 get '/watering_order/:location_id' do |loc_id|
   require_logged_in
 
@@ -442,4 +442,12 @@ post '/watering_order/:location_id' do |loc_id|
   end
 
   redirect "/watering_order/#{loc_id}"
+end
+
+### REPORTS
+
+get '/reports/water_freq' do
+  @plants = PlantRepo.new(DB).active_plants_with_locations.where {water_freq > 0}
+
+  haml :water_freq_report
 end

@@ -32,6 +32,11 @@
                   %li
                     %a.dropdown-item{href: '/plants/new'} Add New Plant
                     %a.dropdown-item{href: '/locations'} Edit Locations
+              %li.nav-item.dropdown
+                %a.nav-link.dropdown-toggle{href: '#', role: :button, 'aria-expanded': false, 'data-bs-toggle': :dropdown } Reports
+                %ul.dropdown-menu
+                  %li
+                    %a.dropdown-item{href: '/reports/water_freq'} Watering Frequency Adjustment Report
               %li.nav-item
                 %a.nav-link{href: '/logout'} Logout
             - else

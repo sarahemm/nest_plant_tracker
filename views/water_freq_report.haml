@@ -1,0 +1,21 @@
+%h2 Watering Frequency Adjustment Report
+
+%ul
+  - @plants.each do |plant|
+    - not_waters = 0
+    - plant.plant_waters.each do |water|
+      - break if water.watered_at.days_ago > plant.water_freq * 4
+      - not_waters += 1 unless water.watering_status.counts_as_watered
+    - if not_waters > 2 then
+      - changelog = PlantRepo.new(DB).by_id(plant.id).changelogs
+      - recent_change = false
+      - changelog.each do |log_entry|
+        - break if log_entry.logged_at.days_ago > 30
+        - if(log_entry.message.include? "Watering frequency changed") then
+          - recent_change = true
+          - break
+      %li
+        %a{href: "/plants/#{plant.id}"}= plant.our_name
+        didn't need water #{not_waters} times in the last #{plant.water_freq * 4} days
+        - if recent_change then
+          (watering frequency has recently been changed)
