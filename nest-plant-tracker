@@ -299,6 +299,7 @@ get '/plants/new' do
   require_logged_in
 
   @locations = LocationRepo.new(DB).all
+  @flags = FlagRepo.new(DB).all
   haml :plants_new
 end
 
@@ -317,6 +318,16 @@ post '/plants/new' do
    fert_notes: params['fertilizer_notes'],
    water_notes: params['water_notes'],
    gen_notes: params['general_notes']
+
+  plant_flags = DB.relations[:plant_flags]
+  FlagRepo.new(DB).all.each do |flag|
+    if(params["flag#{flag.id}"]) then
+      plant_flags.changeset(:create,
+        plant_id: plant.id,
+        flag_id: flag.id
+      ).commit
+    end
+  end
 
   ChangelogRepo.new(DB).add_log_entry plant: plant.id,
     by: session[:user],

@@ -25,6 +25,12 @@
   %input.form-control#waterEvery{name: 'water_every', maxlength: 2, style: 'width: 3em', value: 7}
 
  .mb-3
+  - @flags.each do |flag|
+   %input.btn-check{type: :checkbox, id: "btnFlag#{flag.id}", name: "flag#{flag.id}"}
+   %label.btn{for: "btnFlag#{flag.id}", class: "btn-outline-#{flag.colour_name}"}
+    =flag.name
+
+ .mb-3
   %label.form-label{for: 'fertilizerNotes'} Fertilizer Notes
   %input.form-control#fertilizerNotes{name: 'fertilizer_notes'}
 
