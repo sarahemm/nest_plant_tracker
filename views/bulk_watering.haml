@@ -18,8 +18,8 @@
   %p.mt-3
    %button.btn.btn-primary{type: :submit}
     Adjust Filter
-   %button.btn.btn-outline-secondary{type: :button, onClick: 'this.form.reset(); updateWateringDaysText(); updateNotCheckedInText();'}
-    Reset Filters
+   %a.btn.btn-outline-secondary{type: :button, href: "/bulk-watering"}
+    Clear Filters
 
 %form{method: :post}
  %table.table.table-striped
