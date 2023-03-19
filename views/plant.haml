@@ -11,6 +11,10 @@
  %li Fertilizer notes: #{@plant.fertilizer_notes}
  %li Watering notes: #{@plant.watering_notes}
  %li General notes: #{@plant.general_notes}
+ %li
+  Flags:
+  - @plant.plant_flags.each do |plant_flag|
+   %span.badge.rounded-pill{class: "text-bg-#{plant_flag.flag.colour_name}"}= plant_flag.flag.name
  %li Last watered: #{@plant.last_watered_at.app_format_with_ago}
 Watering Log:
 %ul

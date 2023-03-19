@@ -26,7 +26,7 @@
   %thead
    %tr
     %th{scope: 'col'} Location
-    %th{scope: 'col'} Plant Type
+    %th{scope: 'col'} Flags
     %th{scope: 'col'} Name
     %th{scope: 'col'} Watering
     %th{scope: 'col'} Notes
@@ -38,7 +38,9 @@
     - plants_to_water = true
     %tr
      %td= plant[:location][:name]
-     %td= plant[:plant_type]
+     %td
+      - plant.plant_flags.each do |plant_flag|
+       %span.badge.rounded-pill{class: "text-bg-#{plant_flag.flag.colour_name}"}= plant_flag.flag.abbrev
      %td
       %a{'data-bs-toggle': :popover, 'data-bs-trigger': :focus, tabindex: 0, role: :button, 'data-bs-html': :true, title: "Watering Info for #{plant[:our_name]}", 'data-bs-content': "<ul><li>Water every #{plant.water_freq} days<li>Last checked: #{plant.last_water_check.ago}<li>Last watered: #{plant.last_watered_at.ago}#{"<li>Watering notes: #{plant.watering_notes}" unless plant.watering_notes == ''}</ul>"}
        =plant[:our_name]

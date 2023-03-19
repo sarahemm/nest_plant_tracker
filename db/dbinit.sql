@@ -15,4 +15,7 @@ INSERT INTO locations (name) VALUES ("Boffice");
 INSERT INTO locations (name) VALUES ("Project Room");
 INSERT INTO locations (name) VALUES ("Oasis");
 
+INSERT INTO flags (name, abbrev, colour_name) VALUES ("No Tap Water", "NTW", "danger");
+INSERT INTO flags (name, abbrev, colour_name) VALUES ("Bottom Water", "BW", "info");
+
 COMMIT;
