@@ -1,39 +1,7 @@
 %h2 Watering Frequency Adjustment Report
 
 %ul
-  - # TODO: this whole thing needs logic moved out of the view
-  - @plants.each do |plant|
-    - not_waters = 0
-    - plant.plant_waters.each do |water|
-      - break if water.watered_at.days_ago > plant.water_freq * 4
-      - not_waters += 1 unless water.watering_status.counts_as_watered
-    - if not_waters > 2 then
-      - changelog = PlantRepo.new(DB).by_id(plant.id).changelogs
-      - recent_change = false
-      - changelog.each do |log_entry|
-        - break if log_entry.logged_at.days_ago > 30
-        - if(log_entry.message.include? "Watering frequency changed") then
-          - recent_change = true
-          - break
-      %li
-        %a{href: "/plants/#{plant.id}"}= plant.our_name
-        didn't need water #{not_waters} times in the last #{plant.water_freq * 4} days
-        - if recent_change then
-          (watering frequency has recently been changed)
-    - watering_dates = []
-    - plant.plant_waters.each do |water|
-      - break if water.watered_at.days_ago > 60
-      - watering_dates << water.watered_at if water.watering_status.counts_as_watered
-    - next unless watering_dates.length >= 4 # need a reasonable sample size
-    - next if recent_change # recent changes throw this check off a lot
-    - watering_gaps = []
-    - watering_dates.each_index do |idx|
-      - break if idx == watering_dates.length - 1
-      - watering_gaps << watering_dates[idx] - watering_dates[idx+1]
-    - watering_gap_avg = watering_gaps.inject{ |sum, el| sum + el }.to_f / watering_gaps.size
-    - puts "id: #{plant.id} gap: #{watering_gap_avg / (60*60*24)} freq: #{plant.water_freq}"
-    - if watering_gap_avg / (60*60*24) <= plant.water_freq - 1 then
-      %li
-        %a{href: "/plants/#{plant.id}"}= plant.our_name
-        has needed water more frequently than their setting in the last 60 days
-
+  - @report_entries.each do |entry|
+    %li
+      %a{href: "/plants/#{entry[:plant_id]}"}= entry[:plant_name]
+      =entry[:text]

@@ -447,7 +447,54 @@ end
 ### REPORTS
 
 get '/reports/water_freq' do
-  @plants = PlantRepo.new(DB).active_plants_with_locations.where {water_freq > 0}
+  plants = PlantRepo.new(DB).active_plants_with_locations.where {water_freq > 0}
+
+  @report_entries = []
+  plants.each do |plant|
+    not_waters = 0
+    plant.plant_waters.each do |water|
+      break if water.watered_at.days_ago > plant.water_freq * 4
+      not_waters += 1 unless water.watering_status.counts_as_watered
+    end
+    if(not_waters > 2) then
+      recent_change = false
+      changelog = PlantRepo.new(DB).by_id(plant.id).changelogs
+      changelog.each do |log_entry|
+        break if log_entry.logged_at.days_ago > 30
+        if(log_entry.message.include? "Watering frequency changed") then
+          recent_change = true
+          break
+        end
+      end
+      text = "didn't need water #{not_waters} times in the last #{plant.water_freq * 4} days"
+      text += " (watering frequency has recently been changed)" if recent_change
+      @report_entries << {
+        plant_id: plant.id,
+        plant_name: plant.our_name,
+        text: text
+      }
+    end
+    watering_dates = []
+    plant.plant_waters.each do |water|
+      break if water.watered_at.days_ago > 60
+      watering_dates << water.watered_at if water.watering_status.counts_as_watered
+    end
+    next unless watering_dates.length >= 4 # need a reasonable sample size
+    next if recent_change # recent changes throw this check off a lot
+    watering_gaps = []
+    watering_dates.each_index do |idx|
+      break if idx == watering_dates.length - 1
+      watering_gaps << watering_dates[idx] - watering_dates[idx+1]
+    end
+    watering_gap_avg = watering_gaps.inject{ |sum, el| sum + el }.to_f / watering_gaps.size
+    if watering_gap_avg / (60*60*24) <= plant.water_freq - 1 then
+      @report_entries << {
+        plant_id: plant.id,
+        plant_name: plant.our_name,
+        text: "has needed water more frequently than their setting in the last 60 days"
+      }
+    end
+  end
 
   haml :water_freq_report
 end
