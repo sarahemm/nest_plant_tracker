@@ -29,6 +29,10 @@ module PlantTracker
     def requires_water?
       water_freq > 0
     end
+
+    def has_flag?(id)
+      plant_flags.any?{|flag| flag.flag_id == id}
+    end
   end
 end
 
@@ -231,6 +235,16 @@ end
 class PlantWatersRepo < ROM::Repository[:plant_waters]
 end
 
+class FlagRepo < ROM::Repository[:flags]
+  def all
+    flags.to_a
+  end
+
+  def by_id(id)
+    flags.by_pk(id).one!
+  end
+end
+
 def require_logged_in
   return if session[:user]
 
@@ -314,6 +328,7 @@ end
 get '/plants/:id' do |id|
   @plant = PlantRepo.new(DB).by_id(id)
   @locations = LocationRepo.new(DB).all
+  @flags = FlagRepo.new(DB).all
   @watering_statuses = WateringStatusRepo.new(DB).all
   haml :plant
 end
@@ -355,6 +370,32 @@ post '/plants/:id' do |plant_id|
 
     plant = DB.relations[:plants].by_pk(plant_id)
     plant.changeset(:update, water_freq: params[:water_freq].to_i).commit
+  elsif(params[:change_flags]) then
+    plant = PlantRepo.new(DB).by_id(plant_id)
+    flags = FlagRepo.new(DB).all
+    plant_flags = DB.relations[:plant_flags]
+    flags.each do |flag|
+      if(params["flag#{flag.id}"]) then
+        if(!plant.has_flag? flag.id) then
+          # need to add the flag
+          ChangelogRepo.new(DB).add_log_entry plant: plant_id,
+            by: session[:user],
+            message: "Added flag '#{flag.name}'."
+          plant_flags.changeset(:create,
+            plant_id: plant_id,
+            flag_id: flag.id
+          ).commit
+        end
+      else
+        if(plant.has_flag? flag.id) then
+          # need to remove the flag
+          ChangelogRepo.new(DB).add_log_entry plant: plant_id,
+            by: session[:user],
+            message: "Removed flag '#{flag.name}'."
+          plant_flags.where(plant_id: plant.id, flag_id: flag.id).changeset(:delete).commit
+        end
+      end
+    end
   end
 
   redirect "/plants/#{plant_id}"

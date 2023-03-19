@@ -33,6 +33,8 @@ Plant Change Log:
   Rename #{@plant.our_name}
  %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#waterFreqModal'}
   Change Watering Frequency
+ %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#flagsModal'}
+  Assign Flags to #{@plant.our_name}
  %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#relocateModal'}
   Relocate #{@plant.our_name}
  %button.btn.btn-danger{'data-bs-toggle' => 'modal', 'data-bs-target' => '#archiveModal'}
@@ -136,3 +138,22 @@ Plant Change Log:
      %button.btn.btn-primary{type: :submit}
       Save New Frequency
 
+.modal.fade#flagsModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    %input{type: :hidden, name: :change_flags, value: 1}
+    .modal-header
+     %h5.modal-title#flagsModalLabel
+      Assign Flags to #{@plant.our_name}
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     - @flags.each do |flag|
+      %input.btn-check{type: :checkbox, id: "btnFlag#{flag.id}", name: "flag#{flag.id}", checked: @plant.has_flag?(flag.id)}
+      %label.btn{for: "btnFlag#{flag.id}", class: "btn-outline-#{flag.colour_name}"}
+       =flag.name
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-primary{type: :submit}
+      Save New Flags
