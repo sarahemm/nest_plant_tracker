@@ -326,6 +326,14 @@ post '/plants/:id' do |plant_id|
       watering_status_id: params[:waterstatus],
       notes: params[:notes] == '' ? nil : params[:notes]
     ).commit
+  elsif(params[:water_freq]) then
+    old_freq = PlantRepo.new(DB).by_id(plant_id)[:water_freq]
+    ChangelogRepo.new(DB).add_log_entry plant: plant_id,
+      by: session[:user],
+      message: "Watering frequency changed from #{old_freq} to #{params[:water_freq]}."
+
+    plant = DB.relations[:plants].by_pk(plant_id)
+    plant.changeset(:update, water_freq: params[:water_freq].to_i).commit
   end
 
   redirect "/plants/#{plant_id}"

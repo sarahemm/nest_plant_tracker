@@ -28,6 +28,8 @@ Plant Change Log:
   Water #{@plant.our_name}
  %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#renameModal'}
   Rename #{@plant.our_name}
+ %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#waterFreqModal'}
+  Change Watering Frequency
  %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#relocateModal'}
   Relocate #{@plant.our_name}
  %button.btn.btn-danger{'data-bs-toggle' => 'modal', 'data-bs-target' => '#archiveModal'}
@@ -112,4 +114,22 @@ Plant Change Log:
       Cancel
      %button.btn.btn-success{type: :submit}
       Save Update
+
+.modal.fade#waterFreqModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %Ch5.modal-title#waterFreqModalLabel
+      Change Watering Frequency for #{@plant.our_name}
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     %label{for: "name"}
+      New Frequency:
+     %input.form-control#name{value: @plant.water_freq, name: 'water_freq', autocomplete: 'off', inputmode: :numeric, type: :number, min: 1, max: 28}
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-primary{type: :submit}
+      Save New Frequency
 
