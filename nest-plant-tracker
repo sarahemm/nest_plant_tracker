@@ -60,7 +60,11 @@ class Time
   end
 
   def days_ago
-    (Time.now - self) / (60*60*24).to_i
+    (Time.now.end_of_day - self) / (60*60*24).to_i
+  end
+
+  def end_of_day
+    Time.new(self.year, self.month, self.mday, 23, 59, 59, "-05:00")
   end
 end
 
