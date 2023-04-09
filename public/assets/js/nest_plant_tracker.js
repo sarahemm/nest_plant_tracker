@@ -30,6 +30,17 @@ function readyRenameLocation(name, id) {
   $('#locationId')[0].value = id;
 }
 
+function readyRenameFert(name, id) {
+  $('#renameTitle').text("Rename " + name);
+  $('#newName')[0].value = name;
+  $('#fertId')[0].value = id;
+}
+
+function readyRefreqFert(freq, id) {
+  $('#newFreq')[0].value = freq;
+  $('#fertFreqId')[0].value = id;
+}
+
 $( document ).ready(function() {
   updateWateringDaysText();
   updateNotCheckedInText();

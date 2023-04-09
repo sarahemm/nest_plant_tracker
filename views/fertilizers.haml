@@ -1,0 +1,57 @@
+%h2 Fertilizers
+%table.table.table-striped
+ %thead
+  %tr
+   %th{scope: 'col'} Name
+   %th{scope: 'col'} Frequency
+   %th{scope: 'col'} Controls
+ %tbody
+  - @fertilizers.each do |fert|
+   %tr
+    %td= fert.name
+    %td= fert.freq
+    %td
+     %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#renameModal', onClick: "readyRenameFert('#{fert.name}', #{fert.id});"}
+      Change Name
+     %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#refreqModal', onClick: "readyRefreqFert('#{fert.freq}', #{fert.id});"}
+      Change Frequency
+
+.modal.fade#renameModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %h5.modal-title#renameModalLabel
+      %span#renameTitle
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     %label{for: "newName"}
+      New Name:
+     %input.form-control#newName{name: 'name', autocomplete: 'off'}
+     %input.form-control#fertId{name: 'id', type: :hidden}
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-primary{type: :submit}
+      Save New Name
+
+.modal.fade#refreqModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %h5.modal-title#refreqModalLabel
+      %span#refreqTitle
+       Change Fertilizing Frequency
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     %label{for: "newFreq"}
+      New Frequency:
+     %input.form-control#newFreq{name: 'freq', autocomplete: 'off'}
+     %input.form-control#fertFreqId{name: 'id', type: :hidden}
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-primary{type: :submit}
+      Save New Frequency
+

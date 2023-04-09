@@ -97,6 +97,7 @@ DB = ROM.container(:sql, "sqlite://#{Dir.pwd}/nest-plant-tracker.sqlite3") do |c
         has_many :plant_waters
         has_many :plant_flags
         has_many :flags, through: :plant_flags
+        has_many :plant_fertilizings
       end
     end
   end
@@ -106,6 +107,23 @@ DB = ROM.container(:sql, "sqlite://#{Dir.pwd}/nest-plant-tracker.sqlite3") do |c
       associations do
         belongs_to :plant
         belongs_to :watering_status
+      end
+    end
+  end
+
+  config.relation(:plant_fertilizings) do
+    schema(infer: true) do
+      associations do
+        belongs_to :plant
+        belongs_to :fertilizer
+      end
+    end
+  end
+
+  config.relation(:fertilizers) do
+    schema(infer: true) do
+      associations do
+        has_many :plant_fertilizings
       end
     end
   end
@@ -223,6 +241,28 @@ class LocationRepo < ROM::Repository[:locations]
     locations.by_pk(id).one!
   end
 end
+
+class FertilizerRepo < ROM::Repository[:fertilizers]
+  def all
+    fertilizers.to_a
+  end
+
+  def query(conditions)
+    fertilizers.where(conditions).to_a
+  end
+
+  def by_id(id)
+    fertilizers.by_pk(id).one!
+  end
+
+  def add_fertilizer(name:, freq:)
+    fertilizers.changeset(:create,
+      name: name,
+      freq: freq
+    ).commit
+  end
+end
+
 
 class ChangelogRepo < ROM::Repository[:changelogs]
   def add_log_entry(plant:, by:, message:)
@@ -497,6 +537,45 @@ post '/locations' do
   loc.changeset(:update, name: params[:name]).commit
 
   redirect '/locations'
+end
+
+
+### FERTILIZERS
+
+get '/fertilizers' do
+  require_logged_in
+
+  @fertilizers = FertilizerRepo.new(DB).all
+
+  haml :fertilizers
+end
+
+post '/fertilizers' do
+  require_logged_in
+
+  fert = DB.relations[:fertilizers].by_pk(params[:id])
+
+  if(params[:name]) then
+    fert.changeset(:update, name: params[:name]).commit
+  elsif(params[:freq]) then
+    fert.changeset(:update, freq: params[:freq]).commit
+  end
+
+  redirect '/fertilizers'
+end
+
+get '/fertilizers/new' do
+  require_logged_in
+
+  haml :fertilizers_new
+end
+
+post '/fertilizers/new' do
+  require_logged_in
+
+  FertilizerRepo.new(DB).add_fertilizer name: params['name'], freq: params['freq']
+
+  redirect '/fertilizers'
 end
 
 

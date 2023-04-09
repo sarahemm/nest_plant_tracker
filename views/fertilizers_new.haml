@@ -1,0 +1,13 @@
+%h2 Add New Fertilizer
+
+%form{method: :post}
+ .mb-3
+  %label.form-label{for: 'fertName'} Name
+  %input.form-control#fertName{name: 'name'}
+
+ .mb-3
+  %label.form-label{for: 'fertFreq'} Apply every x days
+  %input.form-control#fertFreq{name: 'freq', maxlength: 2, style: 'width: 3em', value: 28}
+
+ %button.btn.btn-primary{type: :submit}
+  Save New Fertilizer
