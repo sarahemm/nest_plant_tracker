@@ -20,6 +20,10 @@
     Adjust Filter
    %a.btn.btn-outline-secondary{type: :button, href: "/bulk-watering"}
     Clear Filters
+   %input.btn-check{type: :checkbox, id: "fertShowHide"}
+   %label.btn.btn-outline-success{for: "fertShowHide", onClick: 'showHideFert();'}
+    Show/Hide Fertilizing
+   
 
 %form{method: :post}
  %table.table.table-striped
@@ -53,6 +57,10 @@
         %input.btn-check{type: :radio, id: "plant#{plant[:id]}-btnWater#{status[:id]}", name: "plant#{plant[:id]}", value: status[:id]}
         %label.btn.btn-outline-primary{for: "plant#{plant[:id]}-btnWater#{status[:id]}"}
          =status[:name]
+      - if plant.requires_fertilizer?
+       %input.fertButton.btn-check{type: :checkbox, id: "plant#{plant[:id]}-btnFert", name: "plantFert#{plant[:id]}"}
+       %label.fertButton.btn.btn-outline-success{for: "plant#{plant[:id]}-btnFert"}
+        Fertilized
      %td
       %input{id: "note#{plant[:id]}", name: "note#{plant[:id]}"}
  - if plants_to_water

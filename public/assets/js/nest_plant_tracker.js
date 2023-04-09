@@ -41,6 +41,14 @@ function readyRefreqFert(freq, id) {
   $('#fertFreqId')[0].value = id;
 }
 
+function showHideFert() {
+  // TODO: figure out why this only works if it's backwards
+  if($('#fertShowHide').prop('checked'))
+    $('.fertButton').css("visibility", "hidden");
+  else
+    $('.fertButton').css("visibility", "visible");
+}
+
 $( document ).ready(function() {
   updateWateringDaysText();
   updateNotCheckedInText();
