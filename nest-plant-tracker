@@ -93,6 +93,7 @@ DB = ROM.container(:sql, "sqlite://#{Dir.pwd}/nest-plant-tracker.sqlite3") do |c
     schema(infer: true) do
       associations do
         belongs_to :location
+        belongs_to :fertilizer
         has_many :changelogs
         has_many :plant_waters
         has_many :plant_flags
@@ -189,6 +190,7 @@ class PlantRepo < ROM::Repository[:plants]
     plants
       .by_pk(id)
       .combine(:locations)
+      .combine(:fertilizers)
       .combine(:changelogs)
       .combine(plant_waters: :watering_statuses)
       .combine(plant_flags: :flags)
@@ -383,6 +385,7 @@ end
 get '/plants/:id' do |id|
   @plant = PlantRepo.new(DB).by_id(id)
   @locations = LocationRepo.new(DB).all
+  @fertilizers = FertilizerRepo.new(DB).all
   @flags = FlagRepo.new(DB).all
   @watering_statuses = WateringStatusRepo.new(DB).all
   haml :plant
@@ -401,6 +404,20 @@ post '/plants/:id' do |plant_id|
     
     plant = DB.relations[:plants].by_pk(plant_id)
     plant.changeset(:update, location_id: params[:location]).commit
+  elsif(params[:fertilizer]) then
+    old_fert_name = "none"
+    old_fert = PlantRepo.new(DB).by_id(plant_id)[:fertilizer]
+    old_fert_name = old_fert[:name] if old_fert
+    new_fert_name = params[:fertilizer] == 'none' ? 'none' : FertilizerRepo.new(DB).by_id(params[:fertilizer])[:name]
+
+    ChangelogRepo.new(DB).add_log_entry plant: plant_id,
+      by: session[:user],
+      message: "Fertilizer changed from from #{old_fert_name} to #{new_fert_name}."
+
+    plant = DB.relations[:plants].by_pk(plant_id)
+    new_fert_id = params[:fertilizer]
+    new_fert_id = nil if new_fert_id == 'none'
+    plant.changeset(:update, fertilizer_id: new_fert_id).commit
   elsif(params[:name]) then
     old_name = PlantRepo.new(DB).by_id(plant_id)[:our_name]
     ChangelogRepo.new(DB).add_log_entry plant: plant_id,

@@ -8,6 +8,7 @@
   %li Water every: #{@plant.water_freq} days
  - else
   %li Does not require scheduled watering
+ %li Fertilizer: #{@plant.fertilizer_id ? "#{@plant.fertilizer.name} (every #{@plant.fertilizer.freq} days)" : "none"}
  %li Fertilizer notes: #{@plant.fertilizer_notes}
  %li Watering notes: #{@plant.watering_notes}
  %li General notes: #{@plant.general_notes}
@@ -35,6 +36,8 @@ Plant Change Log:
   Change Watering Frequency
  %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#flagsModal'}
   Assign Flags to #{@plant.our_name}
+ %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#fertilizerModal'}
+  Change Fertilizer
  %button.btn.btn-primary{'data-bs-toggle' => 'modal', 'data-bs-target' => '#relocateModal'}
   Relocate #{@plant.our_name}
  %button.btn.btn-danger{'data-bs-toggle' => 'modal', 'data-bs-target' => '#archiveModal'}
@@ -160,3 +163,25 @@ Plant Change Log:
       Cancel
      %button.btn.btn-primary{type: :submit}
       Save New Flags
+
+.modal.fade#fertilizerModal{tabIndex: -1, role: :dialog}
+ .modal-dialog{role: :document}
+  .modal-content
+   %form{method: :post}
+    .modal-header
+     %h5.modal-title#fertilizerModalLabel
+      Change Fertilizer
+     %button.btn-close{type: :button, 'data-bs-dismiss' => 'modal'}
+    .modal-body
+     %input.btn-check{type: :radio, id: "btnFertNone", name: :fertilizer, value: 'none', checked: !@plant.fertilizer_id}
+     %label.btn.btn-outline-secondary{for: "btnFertNone"}
+      None
+     - @fertilizers.each do |fert|
+      %input.btn-check{type: :radio, id: "btnFert#{fert.id}", name: :fertilizer, value: fert.id, checked: @plant.fertilizer_id == fert.id}
+      %label.btn.btn-outline-primary{for: "btnFert#{fert.id}"}
+       =fert.name
+    .modal-footer
+     %button.btn.btn-secondary{type: :button, 'data-bs-dismiss' => 'modal'}
+      Cancel
+     %button.btn.btn-primary{type: :submit}
+      Save New Fertilizer
