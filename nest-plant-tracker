@@ -8,6 +8,8 @@ require 'rom-repository'
 require 'rom-changeset'
 
 enable :sessions
+set :sessions, :expire_after => 2592000
+
 set :port, 4595
 
 module PlantTracker
@@ -16,6 +18,14 @@ module PlantTracker
       plant_waters.each do |water|
         next unless water[:watering_status][:counts_as_watered]
         return water[:watered_at]
+      end
+
+      nil
+    end
+
+    def last_fertilized_at
+      plant_fertilizings.each do |fert|
+        return fert[:fertilized_at]
       end
 
       nil
@@ -120,7 +130,6 @@ DB = ROM.container(:sql, "sqlite://#{Dir.pwd}/nest-plant-tracker.sqlite3") do |c
     schema(infer: true) do
       associations do
         belongs_to :plant
-        belongs_to :fertilizer
       end
     end
   end
@@ -128,7 +137,7 @@ DB = ROM.container(:sql, "sqlite://#{Dir.pwd}/nest-plant-tracker.sqlite3") do |c
   config.relation(:fertilizers) do
     schema(infer: true) do
       associations do
-        has_many :plant_fertilizings
+        has_many :plants
       end
     end
   end
@@ -197,6 +206,7 @@ class PlantRepo < ROM::Repository[:plants]
       .combine(:fertilizers)
       .combine(:changelogs)
       .combine(plant_waters: :watering_statuses)
+      .combine(:plant_fertilizings)
       .combine(plant_flags: :flags)
       .node(:plant_waters) {|plant_waters_relation|
         plant_waters_relation.reverse
@@ -212,6 +222,8 @@ class PlantRepo < ROM::Repository[:plants]
       .join(:locations)
       .combine(:locations)
       .combine(plant_waters: :watering_statuses)
+      .combine(:plant_fertilizings)
+      .combine(:fertilizers)
       .combine(plant_flags: :flags)
       .node(:plant_waters) {|plant_waters_relation|
         plant_waters_relation.reverse
@@ -523,18 +535,29 @@ post '/bulk-watering' do
   require_logged_in
   
   plant_waters = DB.relations[:plant_waters]
+  plant_fertilizings = DB.relations[:plant_fertilizings]
+
   params.each do |key, status_id|
     next if status_id.empty?
-    next unless key.start_with? 'plant'
-
-    plant_id = key.delete_prefix('plant')
+    if(key.start_with? 'plant') then
+      plant_id = key.delete_prefix('plant')
     
-    plant_waters.changeset(:create,
-      plant_id: plant_id,
-      watered_at: Time.now, watered_by: session[:user],
-      watering_status_id: status_id,
-      notes: params["note#{plant_id}"] == '' ? nil : params["note#{plant_id}"]
-    ).commit
+      plant_waters.changeset(:create,
+        plant_id: plant_id,
+        watered_at: Time.now, watered_by: session[:user],
+        watering_status_id: status_id,
+        notes: params["note#{plant_id}"] == '' ? nil : params["note#{plant_id}"]
+      ).commit
+    elsif(key.start_with? 'fert') then
+      plant_id = key.delete_prefix('fert')
+
+      plant_fertilizings.changeset(:create,
+        plant_id: plant_id,
+        fertilized_at: Time.now,
+        fertilized_by: session[:user],
+        notes: params["note#{plant_id}"] == '' ? nil : params["note#{plant_id}"]
+      ).commit
+    end
   end
 
   redirect request.fullpath

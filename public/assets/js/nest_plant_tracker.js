@@ -43,10 +43,18 @@ function readyRefreqFert(freq, id) {
 
 function showHideFert() {
   // TODO: figure out why this only works if it's backwards
-  if($('#fertShowHide').prop('checked'))
+  if($('#fertShowHide').prop('checked')) {
     $('.fertButton').css("visibility", "hidden");
-  else
+    $('.fertPill').css("visibility", "hidden");
+  } else {
     $('.fertButton').css("visibility", "visible");
+    $('.fertPill').css("visibility", "visible");
+  }
+}
+
+function checkWatered(id) {
+  // TODO: shouldn't hardcode the ID of "Watered" (3)
+  $("#plant" + id + "-btnWater3").attr('checked', true);
 }
 
 $( document ).ready(function() {

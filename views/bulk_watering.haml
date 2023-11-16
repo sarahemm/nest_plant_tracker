@@ -45,6 +45,10 @@
      %td
       - plant.plant_flags.each do |plant_flag|
        %span.badge.rounded-pill{class: "text-bg-#{plant_flag.flag.colour_name}"}= plant_flag.flag.abbrev
+      - if(plant.requires_fertilizer? and plant.fertilizer.name != 'All Purpose')
+       %span.fertPill.badge.rounded-pill{class: "text-bg-success"}= "#{plant.fertilizer.name} Fertilizer"
+      - elsif(!plant.requires_fertilizer?)
+       %span.fertPill.badge.rounded-pill{class: "text-bg-success"}= "No Fertilizer"
      %td
       %a{'data-bs-toggle': :popover, 'data-bs-trigger': :focus, tabindex: 0, role: :button, 'data-bs-html': :true, title: "Watering Info for #{plant[:our_name]}", 'data-bs-content': "<ul><li>Water every #{plant.water_freq} days<li>Last checked: #{plant.last_water_check.ago}<li>Last watered: #{plant.last_watered_at.ago}#{"<li>Watering notes: #{plant.watering_notes}" unless plant.watering_notes == ''}</ul>"}
        =plant[:our_name]
@@ -57,8 +61,8 @@
         %input.btn-check{type: :radio, id: "plant#{plant[:id]}-btnWater#{status[:id]}", name: "plant#{plant[:id]}", value: status[:id]}
         %label.btn.btn-outline-primary{for: "plant#{plant[:id]}-btnWater#{status[:id]}"}
          =status[:name]
-      - if plant.requires_fertilizer?
-       %input.fertButton.btn-check{type: :checkbox, id: "plant#{plant[:id]}-btnFert", name: "plantFert#{plant[:id]}"}
+      - if plant.requires_fertilizer? and (!plant.last_fertilized_at or plant.last_fertilized_at.days_ago > plant.fertilizer.freq)
+       %input.fertButton.btn-check{type: :checkbox, id: "plant#{plant[:id]}-btnFert", name: "fert#{plant[:id]}", onClick: "checkWatered(#{plant[:id]});"}
        %label.fertButton.btn.btn-outline-success{for: "plant#{plant[:id]}-btnFert"}
         Fertilized
      %td

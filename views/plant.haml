@@ -17,10 +17,16 @@
   - @plant.plant_flags.each do |plant_flag|
    %span.badge.rounded-pill{class: "text-bg-#{plant_flag.flag.colour_name}"}= plant_flag.flag.name
  %li Last watered: #{@plant.last_watered_at.app_format_with_ago}
+ %li Last fertilized: #{@plant.last_fertilized_at.app_format_with_ago}
 Watering Log:
 %ul
  - @plant.plant_waters.each do |watering|
   %li= "#{watering.watered_at.app_format} [#{watering.watered_by}]: #{watering.watering_status.name} #{watering.notes ? "(#{watering.notes})" : ''}"
+
+Fertilizing Log:
+%ul
+ - @plant.plant_fertilizings.each do |fert|
+  %li= "#{fert.fertilized_at.app_format} [#{fert.fertilized_by}]: Fertilized"
 
 Plant Change Log:
 %ul
