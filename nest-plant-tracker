@@ -208,6 +208,9 @@ class PlantRepo < ROM::Repository[:plants]
       .combine(plant_waters: :watering_statuses)
       .combine(:plant_fertilizings)
       .combine(plant_flags: :flags)
+      .node(:plant_fertilizings) {|plant_fertilizings_relation|
+        plant_fertilizings_relation.reverse
+      }
       .node(:plant_waters) {|plant_waters_relation|
         plant_waters_relation.reverse
       }
@@ -225,6 +228,9 @@ class PlantRepo < ROM::Repository[:plants]
       .combine(:plant_fertilizings)
       .combine(:fertilizers)
       .combine(plant_flags: :flags)
+      .node(:plant_fertilizings) {|plant_fertilizings_relation|
+        plant_fertilizings_relation.reverse
+      }
       .node(:plant_waters) {|plant_waters_relation|
         plant_waters_relation.reverse
       }
